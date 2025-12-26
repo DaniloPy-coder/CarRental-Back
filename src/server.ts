@@ -8,9 +8,13 @@ const app = express();
 
 app.use(express.json());
 app.use(cors({
-    origin: "http://localhost:5173",
-    credentials: true,
+    origin: [
+        "http://localhost:5173",
+        "https://car-rental-iu861vhnx-danilodevs-projects-8f9b933b.vercel.app"
+    ],
+    credentials: true
 }));
+;
 
 const upload = multer(uploadConfig.upload());
 
