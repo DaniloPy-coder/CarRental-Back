@@ -3,31 +3,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CheckAvailabilityCarsService = void 0;
+exports.CheckAvailabilityCarService = void 0;
 const prisma_1 = __importDefault(require("../../prisma"));
-class CheckAvailabilityCarsService {
-    async execute({ pickupDate, returnDate, location }) {
-        const cars = await prisma_1.default.car.findMany({
-            where: {
-                location: {
-                    contains: location,
-                    mode: "insensitive",
-                },
-            },
-            include: {
-                bookings: true,
-            },
+class CheckAvailabilityCarService {
+    async execute({ carId, pickupDate, returnDate }) {
+        const car = await prisma_1.default.car.findUnique({
+            where: { id: carId },
+            include: { bookings: true },
         });
-        const availableCars = cars.filter((car) => {
-            const overlapping = car.bookings.some((booking) => {
-                if (booking.status !== "CONFIRMED")
-                    return false;
-                return (new Date(booking.pickupDate) <= new Date(returnDate) &&
-                    new Date(booking.returnDate) >= new Date(pickupDate));
-            });
-            return !overlapping;
+        if (!car) {
+            throw new Error("Carro não encontrado");
+        }
+        const overlapping = car.bookings.some((booking) => {
+            if (booking.status !== "CONFIRMED")
+                return false;
+            return (new Date(booking.pickupDate) <= new Date(returnDate) &&
+                new Date(booking.returnDate) >= new Date(pickupDate));
         });
-        return availableCars;
+        return !overlapping; // true = disponível, false = ocupado
     }
 }
-exports.CheckAvailabilityCarsService = CheckAvailabilityCarsService;
+exports.CheckAvailabilityCarService = CheckAvailabilityCarService;
