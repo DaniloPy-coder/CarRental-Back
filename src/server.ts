@@ -14,7 +14,6 @@ app.use(cors({
     ],
     credentials: true
 }));
-;
 
 const upload = multer(uploadConfig.upload());
 
