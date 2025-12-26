@@ -1,0 +1,80 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output = "../node_modules/.prisma/client"  
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id         String      @id @default(uuid())
+  name       String
+  email      String   @unique
+  password   String
+  role       Role   @default(user)
+  avatar     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  
+  cars            Car[]
+  bookingsMade    Booking[] @relation("UserBookings")
+  bookingsOwned   Booking[] @relation("OwnerBookings")
+}
+
+model Car {
+  id              String      @id @default(uuid())
+  ownerId         String
+  owner           User     @relation(fields: [ownerId], references: [id])
+  brand           String
+  model           String
+  image           String
+  year            Int
+  category        String
+  seatingCapacity Int
+  fuelType        String
+  transmission    String
+  pricePerDay     Float
+  location        String
+  description     String
+  isAvailable     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  bookings        Booking[]
+}
+
+model Booking {
+  id           String       @id @default(uuid())
+  userId       String
+  ownerId      String
+  carId        String
+  user         User      @relation("UserBookings", fields: [userId], references: [id])
+  owner        User      @relation("OwnerBookings", fields: [ownerId], references: [id])
+  car          Car       @relation(fields: [carId], references: [id])
+  pickupDate   DateTime
+  returnDate   DateTime
+  status       BookingStatus @default(PENDING)
+  price        Float
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+enum Role {
+  owner
+  user
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
