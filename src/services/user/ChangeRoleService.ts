@@ -1,5 +1,4 @@
 import prismaClient from '../../prisma'
-import { Role } from '@prisma/client'
 
 export class ChangeUserRoleService {
     async execute(userId: string) {
@@ -14,7 +13,7 @@ export class ChangeUserRoleService {
         const updatedUser = await prismaClient.user.update({
             where: { id: userId },
             data: {
-                role: Role.owner,
+                role: "owner",
             },
         })
 
