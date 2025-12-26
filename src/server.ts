@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(cors({
     origin: [
         "http://localhost:5173",
-        "https://car-rental-iu861vhnx-danilodevs-projects-8f9b933b.vercel.app"
+        "https://car-rental-taupe-two.vercel.app"
     ],
     credentials: true
 }));
