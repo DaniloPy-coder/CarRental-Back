@@ -27,7 +27,7 @@
     "express-fileupload": "^1.5.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
-    "uuid": "^13.0.0"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
