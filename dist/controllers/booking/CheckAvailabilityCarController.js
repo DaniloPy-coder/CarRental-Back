@@ -4,21 +4,21 @@ exports.CheckAvailabilityCarController = void 0;
 const CheckAvailabilityCarService_1 = require("../../services/booking/CheckAvailabilityCarService");
 class CheckAvailabilityCarController {
     async handle(req, res) {
-        const { carId, pickupDate, returnDate } = req.query;
-        if (!carId || !pickupDate || !returnDate) {
-            return res.status(400).json({ error: "carId, pickupDate e returnDate são obrigatórios" });
+        const { pickupDate, returnDate, location } = req.query;
+        if (!pickupDate || !returnDate || !location) {
+            return res.status(400).json({ error: "pickupDate, returnDate e location são obrigatórios" });
         }
         try {
-            const service = new CheckAvailabilityCarService_1.CheckAvailabilityCarService();
+            const service = new CheckAvailabilityCarService_1.CheckAvailabilityCarsService();
             const availability = await service.execute({
-                carId: carId,
-                pickupDate: new Date(pickupDate),
-                returnDate: new Date(returnDate),
+                pickupDate: pickupDate,
+                returnDate: returnDate,
+                location: location,
             });
-            return res.json(availability);
+            return res.json({ success: true, cars: availability });
         }
         catch (err) {
-            return res.status(400).json({ error: err.message });
+            return res.status(400).json({ success: false, error: err.message });
         }
     }
 }

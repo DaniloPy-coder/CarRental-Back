@@ -1,23 +1,23 @@
 import { Request, Response } from "express";
-import { CheckAvailabilityCarsService } from "../../services/booking/CheckAvailabilityCarService";
+import { CheckAvailabilityCarService } from "../../services/booking/CheckAvailabilityCarService";
 
 class CheckAvailabilityCarController {
     async handle(req: Request, res: Response) {
-        const { pickupDate, returnDate, location } = req.query;
+        const { carId, pickupDate, returnDate } = req.query;
 
-        if (!pickupDate || !returnDate || !location) {
-            return res.status(400).json({ error: "pickupDate, returnDate e location são obrigatórios" });
+        if (!carId || !pickupDate || !returnDate) {
+            return res.status(400).json({ error: "carId, pickupDate e returnDate são obrigatórios" });
         }
 
         try {
-            const service = new CheckAvailabilityCarsService();
-            const availability = await service.execute({
+            const service = new CheckAvailabilityCarService();
+            const available = await service.execute({
+                carId: carId as string,
                 pickupDate: pickupDate as string,
                 returnDate: returnDate as string,
-                location: location as string,
             });
 
-            return res.json({ success: true, cars: availability });
+            return res.json({ success: true, available });
         } catch (err: any) {
             return res.status(400).json({ success: false, error: err.message });
         }

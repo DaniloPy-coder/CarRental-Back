@@ -1,41 +1,33 @@
 import prismaClient from "../../prisma";
 
-interface CheckAvailabilityRequest {
+interface CheckAvailabilityCarRequest {
+    carId: string;
     pickupDate: string;
     returnDate: string;
-    location: string;
 }
 
-class CheckAvailabilityCarsService {
-    async execute({ pickupDate, returnDate, location }: CheckAvailabilityRequest) {
-
-        const cars = await prismaClient.car.findMany({
-            where: {
-                location: {
-                    contains: location,
-                    mode: "insensitive",
-                },
-            },
-            include: {
-                bookings: true,
-            },
+class CheckAvailabilityCarService {
+    async execute({ carId, pickupDate, returnDate }: CheckAvailabilityCarRequest) {
+        const car = await prismaClient.car.findUnique({
+            where: { id: carId },
+            include: { bookings: true },
         });
 
-        const availableCars = cars.filter((car) => {
-            const overlapping = car.bookings.some((booking) => {
-                if (booking.status !== "CONFIRMED") return false;
+        if (!car) {
+            throw new Error("Carro não encontrado");
+        }
 
-                return (
-                    new Date(booking.pickupDate) <= new Date(returnDate) &&
-                    new Date(booking.returnDate) >= new Date(pickupDate)
-                );
-            });
+        const overlapping = car.bookings.some((booking) => {
+            if (booking.status !== "CONFIRMED") return false;
 
-            return !overlapping;
+            return (
+                new Date(booking.pickupDate) <= new Date(returnDate) &&
+                new Date(booking.returnDate) >= new Date(pickupDate)
+            );
         });
 
-        return availableCars;
+        return !overlapping; // true = disponível, false = ocupado
     }
 }
 
-export { CheckAvailabilityCarsService };
+export { CheckAvailabilityCarService };
