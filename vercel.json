@@ -2,13 +2,13 @@
     "version": 2,
     "builds": [
         {
-            "src": "backend/dist/server.js",
+            "src": "dist/server.js",
             "use": "@vercel/node",
             "config": {
                 "includeFiles": [
-                    "backend/dist/**",
-                    "frontend/dist/**",
-                    "prisma/**"
+                    "dist/**",
+                    "prisma/**",
+                    "node_modules/prisma/**"
                 ]
             }
         }
@@ -16,7 +16,7 @@
     "routes": [
         {
             "src": "/(.*)",
-            "dest": "backend/dist/server.js"
+            "dest": "dist/server.js"
         }
     ]
 }
