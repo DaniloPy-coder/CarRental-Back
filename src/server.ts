@@ -3,6 +3,7 @@ import cors from "cors";
 import router from "./routes";
 import multer from "multer";
 import uploadConfig from "./config/multer";
+import path from "path";
 
 const app = express();
 
@@ -17,22 +18,31 @@ app.use(
     })
 );
 
-
 const upload = multer(uploadConfig.upload());
 
 app.use("/", router);
 
+const __dirnameFix = path.resolve();
+
+app.use(express.static(path.join(__dirnameFix, "dist")));
+
+app.get("*", (req: Request, res: Response) => {
+    res.sendFile(
+        path.join(__dirnameFix, "dist", "index.html")
+    );
+});
+
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
     if (err instanceof Error) {
-        res.status(400).json({
+        return res.status(400).json({
             error: err.message,
         });
-    } else {
-        res.status(500).json({
-            status: "error",
-            message: "Internal server error.",
-        });
     }
+
+    return res.status(500).json({
+        status: "error",
+        message: "Internal server error.",
+    });
 });
 
 const PORT = process.env.PORT || 3333;
