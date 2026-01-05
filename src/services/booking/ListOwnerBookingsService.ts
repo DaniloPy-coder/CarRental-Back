@@ -1,19 +1,28 @@
 import prismaClient from "../../prisma";
 
 class ListOwnerBookingsService {
-    async execute(ownerId: string) {
+    async execute(userId: string) {
         const bookings = await prismaClient.booking.findMany({
-            where: { ownerId },
+            where: {
+                car: {
+                    ownerId: userId,
+                },
+            },
             include: {
                 car: true,
-                user: true,
-            },
-            orderBy: {
-                pickupDate: "desc",
             },
         });
 
-        return bookings;
+        const statusMap = {
+            PENDING: "pendente",
+            CONFIRMED: "confirmado",
+            CANCELLED: "cancelado",
+        } as const;
+
+        return bookings.map((booking) => ({
+            ...booking,
+            status: statusMap[booking.status],
+        }));
     }
 }
 

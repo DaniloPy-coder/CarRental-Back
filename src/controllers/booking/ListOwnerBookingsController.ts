@@ -3,22 +3,12 @@ import { ListOwnerBookingsService } from "../../services/booking/ListOwnerBookin
 
 class ListOwnerBookingsController {
     async handle(req: Request, res: Response) {
-        const ownerId = req.user_id;
+        const userId = req.user_id;
 
-        try {
-            const service = new ListOwnerBookingsService();
-            const bookings = await service.execute(ownerId);
+        const service = new ListOwnerBookingsService();
+        const bookings = await service.execute(userId);
 
-            return res.json({
-                success: true,
-                bookings,
-            });
-        } catch (err: any) {
-            return res.status(500).json({
-                success: false,
-                message: err.message,
-            });
-        }
+        return res.json({ success: true, bookings });
     }
 }
 
