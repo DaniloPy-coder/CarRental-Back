@@ -8,8 +8,7 @@
                 "includeFiles": [
                     "backend/dist/**",
                     "frontend/dist/**",
-                    "prisma/**",
-                    "node_modules/prisma/**"
+                    "prisma/**"
                 ]
             }
         }
