@@ -8,7 +8,6 @@ const cors_1 = __importDefault(require("cors"));
 const routes_1 = __importDefault(require("./routes"));
 const multer_1 = __importDefault(require("multer"));
 const multer_2 = __importDefault(require("./config/multer"));
-const path_1 = __importDefault(require("path"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cors_1.default)({
@@ -20,21 +19,18 @@ app.use((0, cors_1.default)({
 }));
 const upload = (0, multer_1.default)(multer_2.default.upload());
 app.use("/", routes_1.default);
-const __dirnameFix = path_1.default.resolve();
-app.use(express_1.default.static(path_1.default.join(__dirnameFix, "dist")));
-app.get("*", (req, res) => {
-    res.sendFile(path_1.default.join(__dirnameFix, "dist", "index.html"));
-});
 app.use((err, req, res, next) => {
     if (err instanceof Error) {
-        return res.status(400).json({
+        res.status(400).json({
             error: err.message,
         });
     }
-    return res.status(500).json({
-        status: "error",
-        message: "Internal server error.",
-    });
+    else {
+        res.status(500).json({
+            status: "error",
+            message: "Internal server error.",
+        });
+    }
 });
 const PORT = process.env.PORT || 3333;
 app.listen(PORT, () => {
