@@ -2,25 +2,28 @@ import { Request, Response } from "express";
 import { AuthUserService } from "../../services/user/AuthUserService";
 
 class AuthUserController {
-    async handle(req: Request, res: Response) {
-        const { email, password } = req.body;
+  async handle(req: Request, res: Response) {
+    try {
+      const { email, password } = req.body;
 
-        const authUserService = new AuthUserService();
+      const authUserService = new AuthUserService();
 
-        const { user, token } = await authUserService.execute({ email, password });
+      const { user, token } = await authUserService.execute({
+        email,
+        password,
+      });
 
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: false,
-            sameSite: "lax",
-            maxAge: 1000 * 60 * 60 * 24,
-        });
-
-        return res.json({
-            user,
-            token,
-        });
+      return res.status(200).json({
+        success: true,
+        user,
+        token,
+      });
+    } catch (error: any) {
+      return res.status(error.statusCode || 500).json({
+        error: error.message || "Internal server error",
+      });
     }
+  }
 }
 
 export { AuthUserController };
