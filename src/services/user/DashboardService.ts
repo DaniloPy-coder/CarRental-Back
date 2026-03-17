@@ -1,52 +1,82 @@
 import prismaClient from "../../prisma";
 
 class DashboardService {
-    async execute(userId: string) {
-        const totalCars = await prismaClient.car.count({
-            where: { ownerId: userId },
-        });
+  async execute(userId: string) {
+    try {
+      const ownerFilter = {
+        car: { ownerId: userId },
+      };
 
-        const totalBookings = await prismaClient.booking.count({
-            where: { car: { ownerId: userId } },
-        });
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
 
-        const pendingBookings = await prismaClient.booking.count({
-            where: { status: "PENDING", car: { ownerId: userId } },
-        });
+      const [
+        totalCars,
+        totalBookings,
+        pendingBookings,
+        completedBookings,
+        recentBookings,
+        cars,
+        revenueData,
+      ] = await Promise.all([
+        prismaClient.car.count({
+          where: { ownerId: userId },
+        }),
 
-        const completedBookings = await prismaClient.booking.count({
-            where: { status: "CONFIRMED", car: { ownerId: userId } },
-        });
+        prismaClient.booking.count({
+          where: ownerFilter,
+        }),
 
-        const recentBookings = await prismaClient.booking.findMany({
-            where: { car: { ownerId: userId } },
-            orderBy: { createdAt: "desc" },
-            take: 5,
-            include: { car: true, user: true },
-        });
+        prismaClient.booking.count({
+          where: { ...ownerFilter, status: "PENDING" },
+        }),
 
-        const cars = await prismaClient.car.findMany({
-            where: { ownerId: userId },
-        });
+        prismaClient.booking.count({
+          where: { ...ownerFilter, status: "CONFIRMED" },
+        }),
 
-        const revenueData = await prismaClient.booking.aggregate({
-            where: { status: "CONFIRMED", car: { ownerId: userId } },
-            _sum: { price: true },
-        });
+        prismaClient.booking.findMany({
+          where: ownerFilter,
+          orderBy: { createdAt: "desc" },
+          take: 5,
+          include: {
+            car: true,
+            user: true,
+          },
+        }),
 
-        const monthlyRevenue = revenueData._sum.price || 0;
+        prismaClient.car.findMany({
+          where: { ownerId: userId },
+          select: {
+            id: true,
+            name: true,
+          },
+        }),
 
-        return {
-            totalCars,
-            totalBookings,
-            pendingBookings,
-            completedBookings,
-            recentBookings,
-            monthlyRevenue,
-            cars,
-        };
+        prismaClient.booking.aggregate({
+          where: {
+            ...ownerFilter,
+            status: "CONFIRMED",
+            createdAt: { gte: startOfMonth },
+          },
+          _sum: { price: true },
+        }),
+      ]);
+
+      return {
+        totalCars,
+        totalBookings,
+        pendingBookings,
+        completedBookings,
+        recentBookings,
+        monthlyRevenue: revenueData._sum.price || 0,
+        cars,
+      };
+    } catch (error) {
+      throw new Error("Erro ao carregar dashboard");
     }
+  }
 }
 
 export { DashboardService };
-
