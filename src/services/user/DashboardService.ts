@@ -4,7 +4,7 @@ class DashboardService {
   async execute(userId: string) {
     try {
       const ownerFilter = {
-        car: { ownerId: userId },
+        ownerId: userId,
       };
 
       const startOfMonth = new Date();
@@ -50,7 +50,8 @@ class DashboardService {
           where: { ownerId: userId },
           select: {
             id: true,
-            name: true,
+            model: true,
+            brand: true,
           },
         }),
 
@@ -74,6 +75,7 @@ class DashboardService {
         cars,
       };
     } catch (error) {
+      console.error(error);
       throw new Error("Erro ao carregar dashboard");
     }
   }
