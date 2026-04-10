@@ -2,13 +2,26 @@ import { Request, Response } from "express";
 import { DashboardService } from "../../services/user/DashboardService";
 class DashboardController {
   async handle(req: Request, res: Response) {
-    const userId = req.user_id;
+    try {
+      const userId = req.user_id;
 
-    const dashboardService = new DashboardService();
+      if (!userId) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Não autorizado" });
+      }
 
-    const data = await dashboardService.execute(userId);
+      const dashboardService = new DashboardService();
+      const data = await dashboardService.execute(userId);
 
-    return res.json(data);
+      return res.json({
+        success: true,
+        data: data,
+      });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ success: false, message: "Erro interno" });
+    }
   }
 }
 
